@@ -1,6 +1,7 @@
 @echo off 
 
 set toPublicize=Assembly-CSharp.dll Assembly-CSharp-firstpass.dll
+set toIgnore=UnityEngine.PhysicsModule.dll
 
 set exePath=%1
 echo exePath: %exePath% 
@@ -13,7 +14,7 @@ echo managedPath: %managedPath%
 
 set outPath=%~dp0\package\lib
 
-@REM Strip all assembiles, but keep them private.
+@REM Strip all assemblies, but keep them private.
 %~dp0\tools\NStrip.exe "%managedPath%" -o %outPath%
 
 @REM Strip and publicize assemblies from toPublicize.
@@ -21,6 +22,13 @@ set outPath=%~dp0\package\lib
   echo a: %%a
 
   %~dp0\tools\NStrip.exe "%managedPath%\%%a" -o "%outPath%\%%a" -cg -p --cg-exclude-events
+))
+
+@REM Copy ignored assemblies, leaving them unstripped
+(for %%b in (%toIgnore%) do (
+  echo overwriting: %%b
+
+  copy "%managedPath%\%%b" "%outPath%\%%b"
 ))
 
 pause
